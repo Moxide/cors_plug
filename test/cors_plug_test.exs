@@ -4,6 +4,7 @@ defmodule CORSPlugTest do
   import Plug.Conn, only: [get_resp_header: 2, put_req_header: 3]
 
   test "returns the right options for regular requests" do
+    Application.put_env(:cors_plug, :options, [])
     opts = CORSPlug.init([])
     conn = conn(:get, "/")
 
@@ -13,7 +14,8 @@ defmodule CORSPlugTest do
   end
 
   test "lets me overwrite options" do
-    opts = CORSPlug.init(origin: "example.com")
+    Application.put_env(:cors_plug, :options, origin: "example.com")
+    opts = CORSPlug.init([])
     conn = :get
       |> conn("/")
       |> put_req_header("origin", "example.com")
@@ -45,7 +47,8 @@ defmodule CORSPlugTest do
   end
 
   test "returns the origin when origin is equal to origin option string" do
-    opts = CORSPlug.init(origin: "example1.com")
+    Application.put_env(:cors_plug, :options, origin: "example1.com")
+    opts = CORSPlug.init([])
     conn =
       :get
       |> conn("/")
@@ -57,7 +60,8 @@ defmodule CORSPlugTest do
   end
 
   test "returns null string when origin is not equal to origin option string" do
-    opts = CORSPlug.init(origin: "example1.com")
+    Application.put_env(:cors_plug, :options, origin: "example1.com")
+    opts = CORSPlug.init([])
     conn =
       :get
       |> conn("/")
@@ -68,7 +72,8 @@ defmodule CORSPlugTest do
   end
 
   test "returns the origin when origin is in origin option list" do
-    opts = CORSPlug.init(origin: ["example1.com", "example2.com"])
+    Application.put_env(:cors_plug, :options, origin: ["example1.com", "example2.com"])
+    opts = CORSPlug.init([])
     conn =
       :get
       |> conn("/")
@@ -80,7 +85,8 @@ defmodule CORSPlugTest do
   end
 
   test "returns null string when origin is not in origin option list" do
-    opts = CORSPlug.init(origin: ["example1.com"])
+    Application.put_env(:cors_plug, :options, origin: ["example1.com"])
+    opts = CORSPlug.init([])
     conn =
       :get
       |> conn("/")
@@ -91,7 +97,8 @@ defmodule CORSPlugTest do
   end
 
   test "returns the origin when origin matches origin option regex" do
-    opts = CORSPlug.init(origin: ~r/^example.+\.com$/)
+    Application.put_env(:cors_plug, :options, origin: ~r/^example.+\.com$/)
+    opts = CORSPlug.init([])
     conn =
       :get
       |> conn("/")
@@ -103,7 +110,8 @@ defmodule CORSPlugTest do
   end
 
   test "returns null string when origin is null and origin option is regex" do
-    opts = CORSPlug.init(origin: ~r/^example.+\.com$/)
+    Application.put_env(:cors_plug, :options, origin: ~r/^example.+\.com$/)
+    opts = CORSPlug.init([])
     conn = conn(:get, "/")
 
     conn = CORSPlug.call(conn, opts)
@@ -111,7 +119,8 @@ defmodule CORSPlugTest do
   end
 
   test "returns null string when origin does not match origin option regex" do
-    opts = CORSPlug.init(origin: ~r/^example.+\.com$/)
+    Application.put_env(:cors_plug, :options, origin: ~r/^example.+\.com$/)
+    opts = CORSPlug.init([])
     conn =
       :get
       |> conn("/")
@@ -122,7 +131,8 @@ defmodule CORSPlugTest do
   end
 
   test "returns the request host when origin is :self" do
-    opts = CORSPlug.init(origin: [:self])
+    Application.put_env(:cors_plug, :options, origin: [:self])
+    opts = CORSPlug.init([])
     conn =
       :get
       |> conn("/")
@@ -135,7 +145,8 @@ defmodule CORSPlugTest do
   end
 
   test "exposed headers are returned" do
-    opts = CORSPlug.init(expose: ["content-range", "content-length", "accept-ranges"])
+    Application.put_env(:cors_plug, :options, expose: ["content-range", "content-length", "accept-ranges"])
+    opts = CORSPlug.init([])
     conn = conn(:options, "/")
 
     conn = CORSPlug.call(conn, opts)
@@ -145,7 +156,8 @@ defmodule CORSPlugTest do
   end
 
   test "allows all incoming headers" do
-    opts = CORSPlug.init(headers: ["*"])
+    Application.put_env(:cors_plug, :options, headers: ["*"])
+    opts = CORSPlug.init([])
     conn =
       :options
       |> conn("/")

@@ -15,8 +15,8 @@ defmodule CORSPlug do
     ]
   end
 
-  def init(options) do
-    Keyword.merge(defaults(), options)
+  def init(_options) do
+    defaults() |> Keyword.merge(Application.get_env(:cors_plug, :options))
   end
 
   def call(conn, options) do
