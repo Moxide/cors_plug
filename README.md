@@ -65,19 +65,36 @@ On `GET`, `POST`, ... requests:
 * Access-Control-Expose-Headers
 * Access-Control-Allow-Credentials
 
+```cors_plug``` may be customized in your configuration files (```config.exs```, ```dev.exs```, ...etc.).
+
+For instance (**these are the default values**) :
+
+```elixir
+config :cors_plug, :options,
+  origin:      "*",
+  credentials: true,
+  max_age:     1728000,
+  headers:     ["Authorization", "Content-Type", "Accept", "Origin",
+                "User-Agent", "DNT","Cache-Control", "X-Mx-ReqToken",
+                "Keep-Alive", "X-Requested-With", "If-Modified-Since",
+                "X-CSRF-Token"],
+  expose:      [],
+  methods:     ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+```
+
 You can configure allowed origins as follows:
 
 ```elixir
-plug CORSPlug, origin: ["http://example1.com", "http://example2.com"]
+config :cors_plug, :options,
+  origin:      ["http://example1.com", "http://example2.com"]
 ```
 
 Alternatively, you can use a regex:
 
 ```elixir
-plug CORSPlug, origin: ~r/https?.*example\d?\.com$/
+config :cors_plug, :options,
+  origin:      ~r/https?.*example\d?\.com$/
 ```
-
-Please find the list of current defaults in [cors_plug.ex](lib/cors_plug.ex#L5:L15).
 
 ## License
 
