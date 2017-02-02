@@ -55,20 +55,9 @@ defmodule CORSPlug do
     Enum.join(key, ",")
   end
 
-  # return origin if it matches regex, otherwise "null" string
-  defp origin(%Regex{} = regex, conn) do
-    req_origin = conn |> request_origin |> to_string
-    if req_origin =~ regex, do: req_origin, else: "null"
-  end
-
   # normalize non-list to list
   defp origin(key, conn) when not is_list(key) do
     origin(List.wrap(key), conn)
-  end
-
-  # whitelist internal requests
-  defp origin([:self], conn) do
-    request_origin(conn) || "*"
   end
 
   # return "*" if origin list is ["*"]
@@ -79,11 +68,21 @@ defmodule CORSPlug do
   # return request origin if in origin list, otherwise "null" string
   # see: https://www.w3.org/TR/cors/#access-control-allow-origin-response-header
   defp origin(origins, conn) when is_list(origins) do
-    req_origin = request_origin(conn)
-    if req_origin in origins, do: req_origin, else: "null"
+    req_origin = get_req_header(conn, "origin") |> List.first
+    case check_origin(origins, req_origin) do
+      {:error, :not_found} -> "null"
+      valid_origin         -> valid_origin
+    end
   end
 
-  defp request_origin(%Plug.Conn{req_headers: headers}) do
-    Enum.find_value(headers, fn({k, v}) -> k =~ ~r/origin/i && v end)
+  defp check_origin(_, req_origin) when is_nil(req_origin), do: {:error, :not_found}
+  defp check_origin([], _req_origin), do: {:error, :not_found}
+  defp check_origin([origin|tail], req_origin) do
+     {:ok, r} = Regex.compile(origin)
+     if Regex.match?(r, req_origin) do
+       req_origin
+     else
+       check_origin(tail, req_origin)
+     end
   end
 end

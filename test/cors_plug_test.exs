@@ -97,7 +97,7 @@ defmodule CORSPlugTest do
   end
 
   test "returns the origin when origin matches origin option regex" do
-    Application.put_env(:cors_plug, :options, origin: ~r/^example.+\.com$/)
+    Application.put_env(:cors_plug, :options, origin: "^example.+\.com$")
     opts = CORSPlug.init([])
     conn =
       :get
@@ -110,7 +110,7 @@ defmodule CORSPlugTest do
   end
 
   test "returns null string when origin is null and origin option is regex" do
-    Application.put_env(:cors_plug, :options, origin: ~r/^example.+\.com$/)
+    Application.put_env(:cors_plug, :options, origin: "^example.+\.com$")
     opts = CORSPlug.init([])
     conn = conn(:get, "/")
 
@@ -119,7 +119,7 @@ defmodule CORSPlugTest do
   end
 
   test "returns null string when origin does not match origin option regex" do
-    Application.put_env(:cors_plug, :options, origin: ~r/^example.+\.com$/)
+    Application.put_env(:cors_plug, :options, origin: "^example.+\.com$")
     opts = CORSPlug.init([])
     conn =
       :get
@@ -128,20 +128,6 @@ defmodule CORSPlugTest do
 
     conn = CORSPlug.call(conn, opts)
     assert ["null"] == get_resp_header conn, "access-control-allow-origin"
-  end
-
-  test "returns the request host when origin is :self" do
-    Application.put_env(:cors_plug, :options, origin: [:self])
-    opts = CORSPlug.init([])
-    conn =
-      :get
-      |> conn("/")
-      |> put_req_header("origin", "http://cors-plug.example")
-
-    conn = CORSPlug.call(conn, opts)
-
-    assert ["http://cors-plug.example"] ==
-           get_resp_header(conn, "access-control-allow-origin")
   end
 
   test "exposed headers are returned" do
