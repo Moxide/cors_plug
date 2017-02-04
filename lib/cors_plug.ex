@@ -5,7 +5,7 @@ defmodule CORSPlug do
     [
       origin:      "*",
       credentials: true,
-      max_age:     1728000,
+      max_age:     "1728000",
       headers:     ["Authorization", "Content-Type", "Accept", "Origin",
                     "User-Agent", "DNT","Cache-Control", "X-Mx-ReqToken",
                     "Keep-Alive", "X-Requested-With", "If-Modified-Since",
@@ -19,6 +19,13 @@ defmodule CORSPlug do
     defaults() |> Keyword.merge(Application.get_env(:cors_plug, :options))
   end
 
+  defp get_origin({:system, var}), do: System.get_env(var)
+  defp get_origin(regexp), do: regexp
+
+  defp get_max_age({:system, var}), do: System.get_env(var)
+  defp get_max_age(age) when is_integer(age), do: Integer.to_string(age)
+  defp get_max_age(age), do: age
+
   def call(conn, options) do
     conn = put_in(conn.resp_headers, conn.resp_headers ++ headers(conn, options))
     case conn.method do
@@ -30,7 +37,7 @@ defmodule CORSPlug do
   # headers specific to OPTIONS request
   defp headers(conn = %Plug.Conn{method: "OPTIONS"}, options) do
     headers(%{conn | method: nil}, options) ++ [
-      {"access-control-max-age", "#{options[:max_age]}"},
+      {"access-control-max-age", get_max_age(options[:max_age]) },
       {"access-control-allow-headers", allowed_headers(options[:headers], conn)},
       {"access-control-allow-methods", Enum.join(options[:methods], ",")}
     ]
@@ -77,8 +84,10 @@ defmodule CORSPlug do
 
   defp check_origin(_, req_origin) when is_nil(req_origin), do: {:error, :not_found}
   defp check_origin([], _req_origin), do: {:error, :not_found}
-  defp check_origin([origin|tail], req_origin) do
-     {:ok, r} = Regex.compile(origin)
+  defp check_origin([raw_origin|tail], req_origin) do
+     {:ok, r} = raw_origin
+     |> get_origin
+     |> Regex.compile
      if Regex.match?(r, req_origin) do
        req_origin
      else
