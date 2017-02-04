@@ -6,10 +6,10 @@ defmodule CORSPlug do
       origin:      "*",
       credentials: true,
       max_age:     1728000,
-      headers:     ["authorization", "content-type", "accept", "origin",
-                    "user-agent", "dnt","cache-control", "x-mx-reqtoken",
-                    "keep-alive", "x-requested-with", "if-modified-since",
-                    "x-csrf-token"],
+      headers:     ["Authorization", "Content-Type", "Accept", "Origin",
+                    "User-Agent", "DNT","Cache-Control", "X-Mx-ReqToken",
+                    "Keep-Alive", "X-Requested-With", "If-Modified-Since",
+                    "X-CSRF-Token"],
       expose:      [],
       methods:     ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     ]
